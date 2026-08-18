@@ -78,6 +78,8 @@ const elTablesGrid = document.getElementById('tablesGrid');
 const elCustomizeButton = document.getElementById('customizeButton');
 const elOverlay = document.getElementById('personalizerOverlay');
 const elClosePersonalizer = document.getElementById('closePersonalizer');
+const elSoonOverlay = document.getElementById('soonOverlay');
+const elCloseSoon = document.getElementById('closeSoon');
 const elThemePresets = document.getElementById('themePresets');
 const elThemePreviewStatus = document.getElementById('themePreviewStatus');
 const elThemePreviewBadge = document.getElementById('themePreviewBadge') || (() => {
@@ -103,6 +105,7 @@ elInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') validateAns
 elCustomizeButton.addEventListener('click', () => {
     elOverlay.classList.add('active');
     elOverlay.setAttribute('aria-hidden', 'false');
+    closeSoon();
 });
 
 elClosePersonalizer.addEventListener('click', closePersonalizer);
@@ -110,15 +113,52 @@ elOverlay.addEventListener('click', (event) => {
     if (event.target === elOverlay) closePersonalizer();
 });
 
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && elOverlay.classList.contains('active')) {
+elCloseSoon.addEventListener('click', closeSoon);
+elSoonOverlay.addEventListener('click', (event) => {
+    if (event.target === elSoonOverlay) closeSoon();
+});
+
+const navButtons = document.querySelectorAll('.nav-item[data-nav]');
+navButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const target = button.dataset.nav;
+        navButtons.forEach(item => item.classList.toggle('active', item === button));
+
+        if (target === 'home') {
+            closePersonalizer();
+            closeSoon();
+            return;
+        }
+
         closePersonalizer();
+        openSoon();
+    });
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        if (elOverlay.classList.contains('active')) {
+            closePersonalizer();
+        }
+        if (elSoonOverlay.classList.contains('active')) {
+            closeSoon();
+        }
     }
 });
 
 function closePersonalizer() {
     elOverlay.classList.remove('active');
     elOverlay.setAttribute('aria-hidden', 'true');
+}
+
+function openSoon() {
+    elSoonOverlay.classList.add('active');
+    elSoonOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeSoon() {
+    elSoonOverlay.classList.remove('active');
+    elSoonOverlay.setAttribute('aria-hidden', 'true');
 }
 
 const savedTheme = safeReadJSON('customTheme', null);

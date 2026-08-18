@@ -35,14 +35,26 @@
         </div>
 
         <nav class="bottom-nav" aria-label="Menú inferior">
-            <button class="nav-item nav-home active" aria-label="Inicio">1</button>
-            <button class="nav-item nav-pet" aria-label="Mascota">2</button>
-            <button class="nav-item nav-chest" aria-label="Cofre">3</button>
-            <button class="nav-item nav-heart" aria-label="Favoritos">4</button>
+            <button class="nav-item nav-home active" data-nav="home" aria-label="Inicio">
+                <img src="img/x_15538955.png" alt="Inicio" class="nav-image" />
+            </button>
+            <button class="nav-item nav-pet" data-nav="soon" aria-label="Mascota">2</button>
+            <button class="nav-item nav-chest" data-nav="soon" aria-label="Cofre">3</button>
+            <button class="nav-item nav-heart" data-nav="soon" aria-label="Favoritos">4</button>
             <button class="nav-item nav-more" id="customizeButton" aria-label="Más">
-                <img src="img/hq_mode.png" alt="Botón personalizado" class="nav-image" />
+                <img src="img/star.png" alt="Botón personalizado" class="nav-image" />
             </button>
         </nav>
+    </div>
+
+    <div class="soon-overlay" id="soonOverlay" aria-hidden="true">
+        <div class="soon-panel" role="dialog" aria-modal="true" aria-labelledby="soonTitle">
+            <div class="panel-header">
+                <h2 id="soonTitle">Próximamente</h2>
+                <button class="close-button" id="closeSoon" aria-label="Cerrar">✕</button>
+            </div>
+            <p class="soon-text">Esta sección estará disponible pronto.</p>
+        </div>
     </div>
 
     <div class="theme-preview-badge hidden" id="themePreviewBadge" aria-live="polite">5s</div>

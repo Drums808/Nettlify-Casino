@@ -292,7 +292,8 @@ button {
     pointer-events: none;
 }
 
-.personalizer-overlay {
+.personalizer-overlay,
+.soon-overlay {
     position: fixed;
     inset: 0;
     display: flex;
@@ -308,13 +309,15 @@ button {
     z-index: 20;
 }
 
-.personalizer-overlay.active {
+.personalizer-overlay.active,
+.soon-overlay.active {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
 }
 
-.personalizer-panel {
+.personalizer-panel,
+.soon-panel {
     width: min(92vw, 360px);
     background: rgba(17, 24, 32, 0.76);
     border: 1px solid rgba(240, 180, 41, 0.3);
@@ -353,6 +356,14 @@ button {
     color: white;
     padding: 0;
     font-size: 1.2rem;
+}
+
+.soon-text {
+    color: #edf5ff;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: center;
+    padding: 0.5rem 0 0.25rem;
 }
 
 .theme-section-header {
