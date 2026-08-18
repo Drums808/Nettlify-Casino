@@ -5,6 +5,9 @@
     --primary: #f0b429;
     --primary-hover: #d99f16;
     --accent: #64d2a6;
+    --active-bg: rgba(240, 180, 41, 0.18);
+    --active-border: rgba(240, 180, 41, 0.7);
+    --active-text: #f7d16a;
     --text: #f4efe7;
     --success-bg: #d9f7e8;
     --success-text: #0f5f3a;
@@ -195,9 +198,9 @@ button {
 
 .btn-mode.active,
 .btn-table.active {
-    background: rgba(240,180,41,0.22);
-    color: #f7d16a;
-    border-color: rgba(240,180,41,0.6);
+    background: var(--active-bg);
+    color: var(--active-text);
+    border-color: var(--active-border);
 }
 
 .btn-mode {

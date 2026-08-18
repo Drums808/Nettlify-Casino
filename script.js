@@ -155,7 +155,7 @@ function startThemePreview(theme) {
         clearInterval(themePreviewInterval);
     }
 
-    let remainingSeconds = 5;
+    let remainingSeconds = 2;
     applyTheme(theme);
     renderPresetThemes();
     if (elOverlay) {
@@ -192,14 +192,14 @@ function startThemePreview(theme) {
         themePreviewInterval = null;
         if (elThemePreviewBadge) {
             elThemePreviewBadge.classList.add('hidden');
-            elThemePreviewBadge.textContent = '5s';
+            elThemePreviewBadge.textContent = '2s';
         }
         elThemePreviewStatus.textContent = `Tema activo: ${themeName}`;
         if (elOverlay) {
             elOverlay.classList.add('active');
             elOverlay.setAttribute('aria-hidden', 'false');
         }
-    }, 5000);
+    }, 2000);
 }
 
 function isThemeSelected(theme) {
@@ -213,6 +213,19 @@ function isThemeSelected(theme) {
         current.accent === theme.accent;
 }
 
+function hexToRgba(hex, alpha) {
+    const cleanHex = hex.replace('#', '');
+    const fullHex = cleanHex.length === 3
+        ? cleanHex.split('').map(char => char + char).join('')
+        : cleanHex;
+
+    const value = parseInt(fullHex, 16);
+    const r = (value >> 16) & 255;
+    const g = (value >> 8) & 255;
+    const b = value & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function applyTheme(theme) {
     if (!isValidTheme(theme)) {
         return;
@@ -223,6 +236,9 @@ function applyTheme(theme) {
     root.style.setProperty('--primary', theme.primary);
     root.style.setProperty('--primary-hover', theme.primary);
     root.style.setProperty('--accent', theme.accent);
+    root.style.setProperty('--active-bg', hexToRgba(theme.primary, 0.18));
+    root.style.setProperty('--active-border', hexToRgba(theme.primary, 0.72));
+    root.style.setProperty('--active-text', theme.primary);
 }
 
 function saveTheme(theme) {
