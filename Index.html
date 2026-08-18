@@ -3,224 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Práctica de Multiplicación</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg: #f3f4f6;
-            --card-bg: #ffffff;
-            --text: #1f2937;
-            --success-bg: #d1fae5;
-            --success-text: #065f46;
-            --error-bg: #fee2e2;
-            --error-text: #991b1b;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; padding: 20px;
-        }
-
-        .card {
-            background-color: var(--card-bg); padding: 2.5rem; border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); width: 100%; max-width: 600px; text-align: center;
-        }
-
-        h1 { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600; }
-
-        .feedback {
-            min-height: 3.5rem; display: flex; align-items: center; justify-content: center;
-            padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-weight: 500;
-            opacity: 0; transition: opacity 0.2s ease;
-        }
-        .feedback.show { opacity: 1; }
-        .feedback.correct { background-color: var(--success-bg); color: var(--success-text); }
-        .feedback.error { background-color: var(--error-bg); color: var(--error-text); }
-
-        .question { font-size: 3rem; font-weight: 700; color: var(--primary); margin-bottom: 2rem; letter-spacing: 1px; }
-
-        input {
-            width: 100%; padding: 1rem; font-size: 1.5rem; text-align: center;
-            border: 2px solid #e5e7eb; border-radius: 0.5rem; outline: none;
-            transition: border-color 0.2s; margin-bottom: 1rem; background-color: #f9fafb;
-        }
-        input:focus { border-color: var(--primary); background-color: #ffffff; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        button { padding: 0.8rem 1rem; font-size: 1rem; font-weight: 600; border: none; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
-        .btn-submit { width: 100%; background-color: var(--primary); color: white; margin-bottom: 1.5rem; padding: 1rem; font-size: 1.1rem; }
-        .btn-submit:hover { background-color: var(--primary-hover); }
-
-        .sections-divider { border-top: 2px solid #f3f4f6; margin: 1.5rem 0; }
-        .section-title { font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem; font-weight: 600; }
-        
-        .main-modes { display: flex; flex-direction: column; gap: 0.5rem; }
-        @media (min-width: 450px) { .main-modes { flex-direction: row; } .main-modes button { flex: 1; } }
-        
-        .tables-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
-        
-        .btn-mode { background-color: #f3f4f6; color: #4b5563; }
-        .btn-mode:hover { background-color: #e5e7eb; }
-        .btn-mode.active { background-color: #e0e7ff; color: var(--primary); border: 1px solid var(--primary); }
-        
-        .btn-table { background-color: #f3f4f6; color: #4b5563; font-size: 0.9rem; padding: 0.6rem 1rem; flex: 1 1 calc(33.333% - 0.5rem); min-width: 120px; }
-        .btn-table:hover { background-color: #e5e7eb; }
-        .btn-table.active { background-color: #e0e7ff; color: var(--primary); border: 1px solid var(--primary); }
-    </style>
+    <title>Casino - Práctica de Ruleta</title>
+    <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
-    <div class="card">
-        <h1>Tablas de Boficación</h1>
-        <div id="feedback" class="feedback"></div>
-        <div class="question" id="questionDisplay">?</div>
-        <input type="number" id="answerInput" placeholder="Tu respuesta..." autocomplete="off">
-        <button class="btn-submit" id="submitBtn">Enviar (Enter)</button>
-        <div class="sections-divider"></div>
-        <div class="modes-container">
-            <div>
-                <div class="section-title">Modos de Práctica</div>
-                <div class="main-modes">
-                    <button class="btn-mode active" id="btnNormal" onclick="switchMode('all')">Todas al azar</button>
-                    <button class="btn-mode" id="btnErrors" onclick="switchMode('errors')">Mis errores (<span id="errorCount">0</span>)</button>
+    <div class="phone-shell">
+        <div class="card">
+            <h1>Práctica de Ruleta</h1>
+            <div id="feedback" class="feedback"></div>
+            <div class="question-timer hidden" id="questionTimer">10s</div>
+            <div class="question" id="questionDisplay">?</div>
+            <div class="answer-row">
+                <input type="number" id="answerInput" placeholder="Tu respuesta..." autocomplete="off">
+                <button class="btn-submit" id="submitBtn" aria-label="Enviar apuesta">Enviar</button>
+            </div>
+            <div class="sections-divider"></div>
+            <div class="modes-container">
+                <div>
+                    <div class="section-title">Modos de práctica</div>
+                    <div class="main-modes">
+                        <button class="btn-mode active" id="btnNormal">Normal</button>
+                        <button class="btn-mode" id="btnErrors">Mis errores (<span id="errorCount">0</span>)</button>
+                        <button class="btn-mode" id="btnTimer">Contra reloj</button>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <div class="section-title">Seleccionar tablas</div>
+                    <div class="tables-grid" id="tablesGrid"></div>
                 </div>
             </div>
-            <div style="margin-top: 1rem;">
-                <div class="section-title">Practicar jugada específica</div>
-                <div class="tables-grid" id="tablesGrid"></div>
+        </div>
+
+        <nav class="bottom-nav" aria-label="Menú inferior">
+            <button class="nav-item nav-home active" aria-label="Inicio">1</button>
+            <button class="nav-item nav-pet" aria-label="Mascota">2</button>
+            <button class="nav-item nav-chest" aria-label="Cofre">3</button>
+            <button class="nav-item nav-heart" aria-label="Favoritos">4</button>
+            <button class="nav-item nav-more" id="customizeButton" aria-label="Más">
+                <img src="img/hq_mode.png" alt="Botón personalizado" class="nav-image" />
+            </button>
+        </nav>
+    </div>
+
+    <div class="theme-preview-badge hidden" id="themePreviewBadge" aria-live="polite">5s</div>
+
+    <div class="personalizer-overlay" id="personalizerOverlay" aria-hidden="true">
+        <div class="personalizer-panel" role="dialog" aria-modal="true" aria-labelledby="personalizerTitle">
+            <div class="panel-header">
+                <h2 id="personalizerTitle">Temas</h2>
+                <button class="close-button" id="closePersonalizer" aria-label="Cerrar temas">✕</button>
             </div>
+
+            <div class="theme-section-header">
+                <span>Selecciona un tema</span>
+                <span class="theme-preview-hint" id="themePreviewStatus">Elige un tema</span>
+            </div>
+            <div class="theme-presets" id="themePresets"></div>
         </div>
     </div>
 
-    <script>
-        const targetTables = [35, 17, 11, 8, 6, 5];
-        const tableNames = {
-            35: "Plenas",
-            17: "Medias",
-            11: "Calles",
-            8:  "Cuartas",
-            6:  "L.Especiales",
-            5:  "Lineas"
-        };
-        const maxMultiplier = 25;
-        let activeMode = 'all';
-        let currentTable = 0;
-        let currentMultiplier = 0;
-        let mustRepeatQuestion = false;
-        let mistakeRegistry = JSON.parse(localStorage.getItem('mathMistakes')) || [];
-
-        const elQuestion = document.getElementById('questionDisplay');
-        const elInput = document.getElementById('answerInput');
-        const elBtnSubmit = document.getElementById('submitBtn');
-        const elFeedback = document.getElementById('feedback');
-        const elBtnNormal = document.getElementById('btnNormal');
-        const elBtnErrors = document.getElementById('btnErrors');
-        const elErrorCount = document.getElementById('errorCount');
-        const elTablesGrid = document.getElementById('tablesGrid');
-
-        generateTableButtons();
-        updateMistakeCounter();
-        generateNextQuestion();
-
-        elBtnSubmit.addEventListener('click', validateAnswer);
-        elInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') validateAnswer(); });
-
-        function generateTableButtons() {
-            targetTables.forEach(table => {
-                const btn = document.createElement('button');
-                btn.className = 'btn-table';
-                btn.textContent = tableNames[table];
-                btn.onclick = () => switchMode(table);
-                btn.dataset.table = table;
-                elTablesGrid.appendChild(btn);
-            });
-        }
-
-        function updateMistakeCounter() { elErrorCount.textContent = mistakeRegistry.length; }
-
-        function saveToRegistry(table, multiplier) {
-            if (!mistakeRegistry.some(item => item.t === table && item.m === multiplier)) {
-                mistakeRegistry.push({ t: table, m: multiplier });
-                localStorage.setItem('mathMistakes', JSON.stringify(mistakeRegistry));
-                updateMistakeCounter();
-            }
-        }
-
-        function removeFromRegistry(table, multiplier) {
-            mistakeRegistry = mistakeRegistry.filter(item => !(item.t === table && item.m === multiplier));
-            localStorage.setItem('mathMistakes', JSON.stringify(mistakeRegistry));
-            updateMistakeCounter();
-        }
-
-        function switchMode(newMode) {
-            if (newMode === 'errors' && mistakeRegistry.length === 0) {
-                showFeedback("¡No tienes errores pendientes!", "correct");
-                setTimeout(hideFeedback, 2500);
-                return;
-            }
-            activeMode = newMode;
-            elBtnNormal.classList.toggle('active', activeMode === 'all');
-            elBtnErrors.classList.toggle('active', activeMode === 'errors');
-            document.querySelectorAll('.btn-table').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.table == activeMode);
-            });
-            mustRepeatQuestion = false;
-            hideFeedback();
-            generateNextQuestion();
-        }
-
-        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-        function generateNextQuestion() {
-            if (mustRepeatQuestion) { elInput.value = ''; elInput.focus(); return; }
-
-            if (activeMode === 'errors') {
-                if (mistakeRegistry.length === 0) { switchMode('all'); return; }
-                const randomIndex = getRandomInt(0, mistakeRegistry.length - 1);
-                currentTable = mistakeRegistry[randomIndex].t;
-                currentMultiplier = mistakeRegistry[randomIndex].m;
-            } else if (activeMode === 'all') {
-                currentTable = targetTables[getRandomInt(0, targetTables.length - 1)];
-                currentMultiplier = getRandomInt(1, maxMultiplier);
-            } else {
-                currentTable = activeMode;
-                currentMultiplier = getRandomInt(1, maxMultiplier);
-            }
-            
-            // Muestra la jugada y el multiplicador
-            elQuestion.textContent = `${currentMultiplier} ${tableNames[currentTable]}`;
-            elInput.value = ''; elInput.focus(); hideFeedback();
-        }
-
-        function validateAnswer() {
-            const userAnswer = parseInt(elInput.value, 10);
-            if (isNaN(userAnswer)) return;
-            const correctAnswer = currentTable * currentMultiplier;
-
-            if (userAnswer === correctAnswer) {
-                showFeedback("¡Correcto!", "correct");
-                if (!mustRepeatQuestion) removeFromRegistry(currentTable, currentMultiplier);
-                mustRepeatQuestion = false;
-                setTimeout(generateNextQuestion, 800);
-            } else {
-                showFeedback(`Incorrecto. ${currentMultiplier} ${tableNames[currentTable]} pagan ${correctAnswer}.`, "error");
-                saveToRegistry(currentTable, currentMultiplier);
-                mustRepeatQuestion = true; 
-                elInput.value = ''; elInput.focus();
-            }
-        }
-
-        function showFeedback(message, type) {
-            elFeedback.textContent = message;
-            elFeedback.className = `feedback show ${type}`;
-        }
-        function hideFeedback() { elFeedback.className = 'feedback'; }
-    </script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>
