@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Casino - Práctica de Ruleta</title>
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=9">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.88/dist/epub.min.js"></script>
 </head>
@@ -40,8 +40,10 @@
             <button class="nav-item nav-home active" data-nav="home" aria-label="Inicio">
                 <img src="img/x_15538955.png" alt="Inicio" class="nav-image" />
             </button>
-            <button class="nav-item nav-pet" data-nav="soon" aria-label="Mascota">2</button>
-            <button class="nav-item nav-chest" data-nav="soon" aria-label="Cofre">3</button>
+            <button class="nav-item nav-pet" data-nav="payments" aria-label="Mascota">
+                <img src="img/fgr.png" alt="Mascota" class="nav-image" />
+            </button>
+            <button class="nav-item nav-chest" data-nav="coming-soon" aria-label="Cofre">3</button>
             <button class="nav-item nav-heart" id="fileViewerButton" aria-label="Visualizador y descargador">
                 <img src="img/fl.png" alt="Favoritos" class="nav-image" />
             </button>
@@ -89,10 +91,26 @@
     </div>
 
     <div class="soon-overlay" id="soonOverlay" aria-hidden="true">
-        <div class="soon-panel" role="dialog" aria-modal="true" aria-labelledby="soonTitle">
+        <main class="payment-panel" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
             <div class="panel-header">
-                <h2 id="soonTitle">Próximamente</h2>
-                <button class="close-button" id="closeSoon" aria-label="Cerrar">✕</button>
+                <h2 id="paymentTitle">Práctica de Pagos</h2>
+                <button class="close-button" id="closeSoon" aria-label="Cerrar práctica">✕</button>
+            </div>
+            <div id="paymentFeedback" class="payment-feedback" aria-live="polite"></div>
+            <div id="paymentQuestion" class="payment-question">Selecciona fichas</div>
+            <input type="number" id="paymentAnswer" placeholder="Total de la suma..." autocomplete="off">
+            <button id="paymentSubmit" class="payment-submit" type="button">Comprobar respuesta (Enter)</button>
+            <div class="payment-divider"><span>Configuración</span></div>
+            <h3>Fichas a incluir:</h3>
+            <div id="paymentCheckboxes" class="payment-checkboxes"></div>
+        </main>
+    </div>
+
+    <div class="soon-overlay" id="comingSoonOverlay" aria-hidden="true">
+        <div class="soon-panel" role="dialog" aria-modal="true" aria-labelledby="comingSoonTitle">
+            <div class="panel-header">
+                <h2 id="comingSoonTitle">Próximamente</h2>
+                <button class="close-button" id="closeComingSoon" aria-label="Cerrar">✕</button>
             </div>
             <p class="soon-text">Esta sección estará disponible pronto.</p>
         </div>
@@ -115,6 +133,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=8"></script>
+    <script src="script.js?v=9"></script>
 </body>
 </html>

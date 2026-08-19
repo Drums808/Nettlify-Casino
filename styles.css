@@ -335,6 +335,93 @@ button {
     overflow: hidden;
 }
 
+.payment-panel {
+    width: min(92vw, 620px);
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--active-border);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.payment-panel .panel-header { margin-bottom: 1rem; }
+.payment-panel .panel-header h2 { color: var(--primary); font-size: 1.25rem; }
+.payment-panel .close-button { background: var(--glass); color: var(--text); }
+.payment-feedback {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    color: transparent;
+    font-size: 0.85rem;
+    text-align: center;
+}
+.payment-feedback.correct { color: var(--success-text); background: var(--success-bg); }
+.payment-feedback.error { color: var(--error-text); background: var(--error-bg); }
+.payment-question {
+    min-height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--accent);
+    font-size: clamp(1.35rem, 4vw, 2.25rem);
+    font-weight: 800;
+    text-align: center;
+}
+.payment-question.compact { font-size: clamp(1.1rem, 3vw, 1.5rem); }
+.payment-panel input[type="number"] {
+    -moz-appearance: textfield;
+}
+.payment-panel input[type="number"]::-webkit-inner-spin-button,
+.payment-panel input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+#paymentAnswer {
+    width: 100%;
+    margin-bottom: 0.85rem;
+    padding: 0.9rem;
+    border: 1px solid var(--active-border);
+    border-radius: 1rem;
+    background: var(--panel-soft);
+    color: var(--text);
+    font-size: 1.35rem;
+    text-align: center;
+    outline: none;
+}
+#paymentAnswer:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--active-bg); background: var(--glass); }
+.payment-submit {
+    width: 100%;
+    padding: 0.9rem;
+    border-radius: 1rem;
+    background: var(--primary);
+    color: #1a1207;
+    font-size: 1rem;
+}
+.payment-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.payment-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1.5rem 0 1rem; color: var(--viewer-text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.payment-divider::before, .payment-divider::after { content: ""; flex: 1; border-top: 1px solid var(--nav-border); }
+.payment-panel h3 { margin-bottom: 0.7rem; color: var(--viewer-text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.payment-checkboxes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
+.payment-option { padding: 0.7rem; border: 1px solid var(--nav-border); border-radius: 0.8rem; background: var(--panel-soft); color: var(--text); text-align: center; }
+.payment-option:has(input[type="checkbox"]:checked) { border-color: var(--active-border); background: var(--active-bg); color: var(--active-text); }
+.payment-option > input[type="checkbox"] { margin-right: 0.35rem; accent-color: var(--primary); }
+.payment-option label { cursor: pointer; font-weight: 700; }
+.payment-option-multiplier { display: block; font-size: 0.7rem; font-weight: 400; opacity: 0.75; }
+.payment-limit { display: flex; align-items: center; justify-content: center; gap: 0.25rem; margin-top: 0.45rem; padding-top: 0.45rem; border-top: 1px solid rgba(156,163,175,0.25); font-size: 0.65rem; }
+.payment-limit input { width: 3rem; height: 1.5rem; padding: 0.1rem; border: 1px solid var(--active-border); border-radius: 0.35rem; background: var(--glass); color: var(--text); text-align: center; }
+@keyframes payment-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.payment-shake { animation: payment-shake 0.3s ease-in-out; }
+
+@media (max-width: 430px) {
+    .payment-panel { padding: 1rem; }
+    .payment-checkboxes { grid-template-columns: 1fr; }
+}
+
 .personalizer-panel::before {
     content: "";
     position: absolute;

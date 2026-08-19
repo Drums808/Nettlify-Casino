@@ -75,6 +75,22 @@ let viewerPdfDocument = null;
 let viewerPdfPage = 1;
 let viewerPdfTotalPages = 0;
 let viewerEpubRendition = null;
+const paymentTables = [35, 17, 8, 11, 6, 5];
+const paymentLabels = {
+    5: { singular: 'Línea', plural: 'Líneas' },
+    6: { singular: 'L.Especial', plural: 'L.Especiales' },
+    8: { singular: 'Cuarta', plural: 'Cuartas' },
+    11: { singular: 'Calle', plural: 'Calles' },
+    17: { singular: 'Media', plural: 'Medias' },
+    35: { singular: 'Plena', plural: 'Plenas' }
+};
+const paymentMaxMultipliers = paymentTables.reduce((limits, table) => {
+    limits[table] = 20;
+    return limits;
+}, {});
+let paymentTerms = [];
+let paymentCorrectAnswer = 0;
+let paymentMustRepeat = false;
 
 const elQuestion = document.getElementById('questionDisplay');
 const elInput = document.getElementById('answerInput');
@@ -91,6 +107,13 @@ const elOverlay = document.getElementById('personalizerOverlay');
 const elClosePersonalizer = document.getElementById('closePersonalizer');
 const elSoonOverlay = document.getElementById('soonOverlay');
 const elCloseSoon = document.getElementById('closeSoon');
+const elComingSoonOverlay = document.getElementById('comingSoonOverlay');
+const elCloseComingSoon = document.getElementById('closeComingSoon');
+const elPaymentQuestion = document.getElementById('paymentQuestion');
+const elPaymentAnswer = document.getElementById('paymentAnswer');
+const elPaymentSubmit = document.getElementById('paymentSubmit');
+const elPaymentFeedback = document.getElementById('paymentFeedback');
+const elPaymentCheckboxes = document.getElementById('paymentCheckboxes');
 const elFileViewerButton = document.getElementById('fileViewerButton');
 const elFileViewerOverlay = document.getElementById('fileViewerOverlay');
 const elFileViewerBody = document.querySelector('.file-viewer-body');
@@ -129,7 +152,8 @@ elInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') validateAns
 elCustomizeButton.addEventListener('click', () => {
     elOverlay.classList.add('active');
     elOverlay.setAttribute('aria-hidden', 'false');
-    closeSoon();
+    closePayments();
+    closeComingSoon();
     closeFileViewer();
 });
 
@@ -138,9 +162,17 @@ elOverlay.addEventListener('click', (event) => {
     if (event.target === elOverlay) closePersonalizer();
 });
 
-elCloseSoon.addEventListener('click', closeSoon);
+elCloseSoon.addEventListener('click', closePayments);
 elSoonOverlay.addEventListener('click', (event) => {
-    if (event.target === elSoonOverlay) closeSoon();
+    if (event.target === elSoonOverlay) closePayments();
+});
+elCloseComingSoon.addEventListener('click', closeComingSoon);
+elComingSoonOverlay.addEventListener('click', (event) => {
+    if (event.target === elComingSoonOverlay) closeComingSoon();
+});
+elPaymentSubmit.addEventListener('click', validatePaymentAnswer);
+elPaymentAnswer.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') validatePaymentAnswer();
 });
 
 elFileViewerButton.addEventListener('click', openFileViewer);
@@ -168,13 +200,16 @@ navButtons.forEach(button => {
 
         if (target === 'home') {
             closePersonalizer();
-            closeSoon();
+            closePayments();
+            closeComingSoon();
             closeFileViewer();
             return;
         }
 
         closePersonalizer();
-        openSoon();
+        closeFileViewer();
+        if (target === 'payments') openPayments();
+        if (target === 'coming-soon') openComingSoon();
     });
 });
 
@@ -184,7 +219,10 @@ document.addEventListener('keydown', (event) => {
             closePersonalizer();
         }
         if (elSoonOverlay.classList.contains('active')) {
-            closeSoon();
+            closePayments();
+        }
+        if (elComingSoonOverlay.classList.contains('active')) {
+            closeComingSoon();
         }
         if (elFileViewerOverlay.classList.contains('active')) {
             closeFileViewer();
@@ -200,19 +238,122 @@ function closePersonalizer() {
     elOverlay.setAttribute('aria-hidden', 'true');
 }
 
-function openSoon() {
+function openPayments() {
+    generatePaymentCheckboxes();
     elSoonOverlay.classList.add('active');
     elSoonOverlay.setAttribute('aria-hidden', 'false');
+    generatePaymentQuestion();
 }
 
-function closeSoon() {
+function closePayments() {
     elSoonOverlay.classList.remove('active');
     elSoonOverlay.setAttribute('aria-hidden', 'true');
 }
 
+function openComingSoon() {
+    elComingSoonOverlay.classList.add('active');
+    elComingSoonOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeComingSoon() {
+    elComingSoonOverlay.classList.remove('active');
+    elComingSoonOverlay.setAttribute('aria-hidden', 'true');
+}
+
+function generatePaymentCheckboxes() {
+    elPaymentCheckboxes.innerHTML = '';
+    paymentTables.forEach(table => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'payment-option';
+        wrapper.innerHTML = `
+            <input type="checkbox" id="payment-table-${table}" value="${table}" checked>
+            <label for="payment-table-${table}">
+                <span>${paymentLabels[table].plural}</span>
+                <span class="payment-option-multiplier">(x${table})</span>
+            </label>
+            <div class="payment-limit">
+                <span>Fichas máx:</span>
+                <input type="number" min="1" max="20" value="${paymentMaxMultipliers[table]}" data-table="${table}">
+            </div>
+        `;
+        const checkbox = wrapper.querySelector('input[type="checkbox"]');
+        const multiplier = wrapper.querySelector('input[type="number"]');
+        checkbox.addEventListener('change', generatePaymentQuestion);
+        multiplier.addEventListener('click', event => event.stopPropagation());
+        multiplier.addEventListener('change', () => {
+            let value = parseInt(multiplier.value, 10);
+            if (Number.isNaN(value) || value < 1) value = 1;
+            multiplier.value = Math.min(value, 20);
+            paymentMaxMultipliers[table] = parseInt(multiplier.value, 10);
+            paymentMustRepeat = false;
+            generatePaymentQuestion();
+        });
+        elPaymentCheckboxes.appendChild(wrapper);
+    });
+}
+
+function generatePaymentQuestion() {
+    if (paymentMustRepeat) {
+        elPaymentAnswer.value = '';
+        elPaymentAnswer.focus();
+        return;
+    }
+
+    const selectedTables = Array.from(elPaymentCheckboxes.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(checkbox => parseInt(checkbox.value, 10));
+    if (selectedTables.length === 0) {
+        elPaymentQuestion.textContent = 'Selecciona fichas abajo';
+        elPaymentAnswer.disabled = true;
+        elPaymentSubmit.disabled = true;
+        return;
+    }
+
+    elPaymentAnswer.disabled = false;
+    elPaymentSubmit.disabled = false;
+    paymentTerms = selectedTables.map(table => {
+        const multiplier = Math.floor(Math.random() * paymentMaxMultipliers[table]) + 1;
+        return { table, multiplier, result: table * multiplier };
+    });
+    paymentCorrectAnswer = paymentTerms.reduce((total, term) => total + term.result, 0);
+    elPaymentQuestion.textContent = paymentTerms.map(term => {
+        const label = term.multiplier === 1 ? paymentLabels[term.table].singular : paymentLabels[term.table].plural;
+        return `${term.multiplier} ${label}`;
+    }).join(' + ');
+    elPaymentQuestion.classList.toggle('compact', elPaymentQuestion.textContent.length > 50);
+    elPaymentAnswer.value = '';
+    elPaymentAnswer.focus();
+    elPaymentFeedback.textContent = '';
+    elPaymentFeedback.className = 'payment-feedback';
+}
+
+function validatePaymentAnswer() {
+    if (elPaymentAnswer.disabled) return;
+    const answer = parseInt(elPaymentAnswer.value, 10);
+    if (Number.isNaN(answer)) return;
+
+    if (answer === paymentCorrectAnswer) {
+        elPaymentFeedback.textContent = '¡Cálculo correcto! Excelente trabajo.';
+        elPaymentFeedback.className = 'payment-feedback correct';
+        paymentMustRepeat = false;
+        setTimeout(generatePaymentQuestion, 900);
+        return;
+    }
+
+    const breakdown = paymentTerms.map(term => term.result).join(' + ');
+    elPaymentFeedback.textContent = `Incorrecto. Valores: ${breakdown} = ${paymentCorrectAnswer}`;
+    elPaymentFeedback.className = 'payment-feedback error';
+    paymentMustRepeat = true;
+    elPaymentAnswer.value = '';
+    elPaymentAnswer.classList.remove('payment-shake');
+    void elPaymentAnswer.offsetWidth;
+    elPaymentAnswer.classList.add('payment-shake');
+    elPaymentAnswer.focus();
+}
+
 function openFileViewer() {
     closePersonalizer();
-    closeSoon();
+    closePayments();
+    closeComingSoon();
     clearViewerSelection();
     elFileViewerButton.classList.add('active');
     elFileViewerOverlay.classList.add('active');
