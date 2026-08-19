@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Casino - Práctica de Ruleta</title>
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.88/dist/epub.min.js"></script>
 </head>
 <body>
     <div class="phone-shell">
@@ -40,11 +42,50 @@
             </button>
             <button class="nav-item nav-pet" data-nav="soon" aria-label="Mascota">2</button>
             <button class="nav-item nav-chest" data-nav="soon" aria-label="Cofre">3</button>
-            <button class="nav-item nav-heart" data-nav="soon" aria-label="Favoritos">4</button>
+            <button class="nav-item nav-heart" id="fileViewerButton" aria-label="Visualizador y descargador">
+                <img src="img/fl.png" alt="Favoritos" class="nav-image" />
+            </button>
             <button class="nav-item nav-more" id="customizeButton" aria-label="Más">
                 <img src="img/star.png" alt="Botón personalizado" class="nav-image" />
             </button>
         </nav>
+    </div>
+
+    <div class="file-viewer-overlay" id="fileViewerOverlay" aria-hidden="true">
+        <div class="file-viewer-panel" role="dialog" aria-modal="true" aria-labelledby="fileViewerTitle">
+            <div class="file-viewer-header">
+                <div>
+                    <h2 id="fileViewerTitle">Documentos</h2>
+                    <p>Visualiza los archivos de estudio</p>
+                </div>
+                <button class="close-button" id="closeFileViewer" aria-label="Cerrar visualizador">✕</button>
+            </div>
+
+            <div class="file-viewer-actions">
+                <input id="fileInput" type="file" multiple>
+                <input class="file-search" id="fileSearch" type="search" placeholder="Buscar archivo..." aria-label="Buscar archivo">
+                <span class="file-counter" id="fileCounter">0</span>
+            </div>
+
+            <div class="file-viewer-body">
+                <aside class="file-list" id="fileList">
+                    <div class="file-empty" id="fileEmpty">No hay archivos cargados</div>
+                </aside>
+            </div>
+            <div class="file-pdf-controls hidden" id="filePdfControls">
+                <button id="previousPdfPage" aria-label="Página anterior">‹</button>
+                <span id="pdfPageNumber">1 / 1</span>
+                <button id="nextPdfPage" aria-label="Página siguiente">›</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="document-fullscreen-overlay" id="documentFullscreenOverlay" aria-hidden="true">
+        <button class="document-fullscreen-close" id="closeDocumentFullscreen" type="button" aria-label="Cerrar documento">✕</button>
+        <div class="document-fullscreen-content">
+            <img id="fullscreenDocumentImage" alt="Documento visualizado">
+            <p id="fullscreenDocumentFallback" class="hidden">Este documento no se puede visualizar.</p>
+        </div>
     </div>
 
     <div class="soon-overlay" id="soonOverlay" aria-hidden="true">
@@ -74,6 +115,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=8"></script>
 </body>
 </html>

@@ -64,6 +64,17 @@ if (!Array.isArray(mistakeRegistry)) {
 }
 let themePreviewTimer = null;
 let themePreviewInterval = null;
+let viewerFiles = [
+    { id: 'figuras-1', file: { name: 'Figuras 1.jpg', size: 0, type: 'image/jpeg' }, url: 'doc/Figuras%201.jpg' },
+    { id: 'figuras-2', file: { name: 'Figuras 2.jpg', size: 0, type: 'image/jpeg' }, url: 'doc/Figuras%202.jpg' },
+    { id: 'figuras-3', file: { name: 'Figuras 3.jpg', size: 0, type: 'image/jpeg' }, url: 'doc/Figuras%203.jpg' },
+    { id: 'tablas-conversion', file: { name: 'Tablas de Conversion.jpg', size: 0, type: 'image/jpeg' }, url: 'doc/Tablas%20de%20Conversion.jpg' }
+];
+let viewerCurrentFile = null;
+let viewerPdfDocument = null;
+let viewerPdfPage = 1;
+let viewerPdfTotalPages = 0;
+let viewerEpubRendition = null;
 
 const elQuestion = document.getElementById('questionDisplay');
 const elInput = document.getElementById('answerInput');
@@ -80,6 +91,19 @@ const elOverlay = document.getElementById('personalizerOverlay');
 const elClosePersonalizer = document.getElementById('closePersonalizer');
 const elSoonOverlay = document.getElementById('soonOverlay');
 const elCloseSoon = document.getElementById('closeSoon');
+const elFileViewerButton = document.getElementById('fileViewerButton');
+const elFileViewerOverlay = document.getElementById('fileViewerOverlay');
+const elFileViewerBody = document.querySelector('.file-viewer-body');
+const elCloseFileViewer = document.getElementById('closeFileViewer');
+const elDocumentFullscreenOverlay = document.getElementById('documentFullscreenOverlay');
+const elCloseDocumentFullscreen = document.getElementById('closeDocumentFullscreen');
+const elFullscreenDocumentImage = document.getElementById('fullscreenDocumentImage');
+const elFullscreenDocumentFallback = document.getElementById('fullscreenDocumentFallback');
+const elFileInput = document.getElementById('fileInput');
+const elFileSearch = document.getElementById('fileSearch');
+const elFileList = document.getElementById('fileList');
+const elFileEmpty = document.getElementById('fileEmpty');
+const elFileCounter = document.getElementById('fileCounter');
 const elThemePresets = document.getElementById('themePresets');
 const elThemePreviewStatus = document.getElementById('themePreviewStatus');
 const elThemePreviewBadge = document.getElementById('themePreviewBadge') || (() => {
@@ -106,6 +130,7 @@ elCustomizeButton.addEventListener('click', () => {
     elOverlay.classList.add('active');
     elOverlay.setAttribute('aria-hidden', 'false');
     closeSoon();
+    closeFileViewer();
 });
 
 elClosePersonalizer.addEventListener('click', closePersonalizer);
@@ -118,6 +143,23 @@ elSoonOverlay.addEventListener('click', (event) => {
     if (event.target === elSoonOverlay) closeSoon();
 });
 
+elFileViewerButton.addEventListener('click', openFileViewer);
+elCloseFileViewer.addEventListener('click', closeFileViewer);
+elFileViewerOverlay.addEventListener('click', (event) => {
+    if (event.target === elFileViewerOverlay) closeFileViewer();
+});
+elFileViewerOverlay.addEventListener('dragover', (event) => event.preventDefault());
+elFileViewerOverlay.addEventListener('drop', (event) => {
+    event.preventDefault();
+    addViewerFiles(event.dataTransfer.files);
+});
+elFileInput.addEventListener('change', () => addViewerFiles(elFileInput.files));
+elFileSearch.addEventListener('input', renderViewerFileList);
+elCloseDocumentFullscreen.addEventListener('click', closeDocumentFullscreen);
+elDocumentFullscreenOverlay.addEventListener('click', (event) => {
+    if (event.target === elDocumentFullscreenOverlay) closeDocumentFullscreen();
+});
+
 const navButtons = document.querySelectorAll('.nav-item[data-nav]');
 navButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -127,6 +169,7 @@ navButtons.forEach(button => {
         if (target === 'home') {
             closePersonalizer();
             closeSoon();
+            closeFileViewer();
             return;
         }
 
@@ -142,6 +185,12 @@ document.addEventListener('keydown', (event) => {
         }
         if (elSoonOverlay.classList.contains('active')) {
             closeSoon();
+        }
+        if (elFileViewerOverlay.classList.contains('active')) {
+            closeFileViewer();
+        }
+        if (elDocumentFullscreenOverlay.classList.contains('active')) {
+            closeDocumentFullscreen();
         }
     }
 });
@@ -159,6 +208,220 @@ function openSoon() {
 function closeSoon() {
     elSoonOverlay.classList.remove('active');
     elSoonOverlay.setAttribute('aria-hidden', 'true');
+}
+
+function openFileViewer() {
+    closePersonalizer();
+    closeSoon();
+    clearViewerSelection();
+    elFileViewerButton.classList.add('active');
+    elFileViewerOverlay.classList.add('active');
+    elFileViewerOverlay.setAttribute('aria-hidden', 'false');
+    renderViewerFileList();
+}
+
+function closeFileViewer() {
+    exitFileFocusMode();
+    clearViewerSelection();
+    elFileViewerButton.classList.remove('active');
+    elFileViewerOverlay.classList.remove('active');
+    elFileViewerOverlay.setAttribute('aria-hidden', 'true');
+}
+
+function openDocumentFullscreen(item) {
+    const extension = item.file.name.split('.').pop().toLowerCase();
+    const isImage = item.file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension);
+
+    elFileViewerOverlay.classList.remove('active');
+    elDocumentFullscreenOverlay.classList.add('active');
+    elDocumentFullscreenOverlay.setAttribute('aria-hidden', 'false');
+    elDocumentFullscreenOverlay.scrollTop = 0;
+    elFullscreenDocumentFallback.classList.toggle('hidden', isImage);
+    elFullscreenDocumentImage.classList.toggle('hidden', !isImage);
+    if (isImage) {
+        elFullscreenDocumentImage.src = item.url;
+        elFullscreenDocumentImage.alt = item.file.name;
+        elFullscreenDocumentImage.onload = () => {
+            elDocumentFullscreenOverlay.scrollTop = 0;
+        };
+    }
+}
+
+function closeDocumentFullscreen() {
+    elDocumentFullscreenOverlay.classList.remove('active');
+    elDocumentFullscreenOverlay.setAttribute('aria-hidden', 'true');
+    elFullscreenDocumentImage.removeAttribute('src');
+    elFileViewerOverlay.classList.add('active');
+    elFileViewerOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function addViewerFiles(fileList) {
+    Array.from(fileList || []).forEach(file => {
+        viewerFiles.push({
+            id: `viewer-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            file,
+            url: URL.createObjectURL(file)
+        });
+    });
+    elFileInput.value = '';
+    renderViewerFileList();
+}
+
+function renderViewerFileList() {
+    const filter = elFileSearch.value.trim().toLowerCase();
+    const visibleFiles = viewerFiles.filter(item => item.file.name.toLowerCase().includes(filter));
+    elFileCounter.textContent = viewerFiles.length;
+    elFileEmpty.classList.toggle('hidden', visibleFiles.length > 0);
+    elFileEmpty.textContent = viewerFiles.length === 0 ? 'No hay archivos cargados' : 'No hay coincidencias';
+    elFileList.querySelectorAll('.file-list-item').forEach(item => item.remove());
+
+    visibleFiles.forEach(item => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `file-list-item${viewerCurrentFile && viewerCurrentFile.id === item.id ? ' active' : ''}`;
+        const extension = item.file.name.split('.').pop().toLowerCase();
+        const isImage = item.file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension);
+        button.innerHTML = `${isImage
+            ? `<img class="file-thumbnail" src="${item.url}" alt="">`
+            : `<span class="file-thumbnail-placeholder">${escapeHtml(extension.toUpperCase())}</span>`
+        }<span class="file-list-name">${escapeHtml(item.file.name)}</span>`;
+        button.addEventListener('click', () => openDocumentFullscreen(item));
+        elFileList.appendChild(button);
+    });
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function selectViewerFile(id, focusMode = true) {
+    viewerCurrentFile = viewerFiles.find(item => item.id === id) || null;
+    renderViewerFileList();
+    if (viewerCurrentFile) {
+        setupViewerFile(viewerCurrentFile);
+        if (focusMode) {
+            enterFileFocusMode();
+        }
+    }
+}
+
+function enterFileFocusMode() {
+    document.querySelector('.file-viewer-panel').classList.add('focus-mode');
+}
+
+function exitFileFocusMode() {
+    document.querySelector('.file-viewer-panel').classList.remove('focus-mode');
+}
+
+function resetViewerRenderers() {
+    [elFileImage, elFilePdf, elFileEpub, elFileText, elFileFallback].forEach(element => {
+        element.classList.add('hidden');
+    });
+    elFilePdfControls.classList.add('hidden');
+    elFileEpub.innerHTML = '';
+    viewerEpubRendition = null;
+}
+
+function clearViewerSelection() {
+    viewerCurrentFile = null;
+    elFileViewerBody.classList.add('documents-only');
+}
+
+function setupViewerFile(item) {
+    const file = item.file;
+    const extension = file.name.split('.').pop().toLowerCase();
+    const isImage = file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension);
+    const isPdf = extension === 'pdf' || file.type === 'application/pdf';
+    const isEpub = extension === 'epub' || file.type === 'application/epub+zip';
+    const isText = file.type.startsWith('text/') || ['txt', 'md', 'json', 'js', 'html', 'css', 'csv'].includes(extension);
+
+    elFileViewerBody.classList.remove('documents-only');
+    elFilePreview.classList.remove('hidden');
+    elFilePreviewToolbar.classList.remove('hidden');
+    elFileName.textContent = file.name;
+    elFileMeta.textContent = `${formatViewerBytes(file.size)} • ${file.type || 'Archivo'}`;
+    resetViewerRenderers();
+
+    if (isImage) {
+        elFileImage.src = item.url;
+        elFileImage.classList.remove('hidden');
+    } else if (isPdf) {
+        loadViewerPdf(item.url);
+    } else if (isEpub && typeof window.ePub === 'function') {
+        loadViewerEpub(file);
+    } else if (isText) {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+            elFileText.textContent = reader.result;
+            elFileText.classList.remove('hidden');
+        });
+        reader.readAsText(file);
+    } else {
+        elFileFallback.classList.remove('hidden');
+    }
+}
+
+function formatViewerBytes(bytes) {
+    if (!bytes) return '0 Bytes';
+    const units = ['Bytes', 'KB', 'MB', 'GB'];
+    const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    return `${parseFloat((bytes / Math.pow(1024, unitIndex)).toFixed(2))} ${units[unitIndex]}`;
+}
+
+async function loadViewerPdf(url) {
+    if (!window.pdfjsLib) {
+        elFileFallback.textContent = 'No se pudo cargar el visor PDF. Descarga el archivo para abrirlo.';
+        elFileFallback.classList.remove('hidden');
+        return;
+    }
+    try {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        viewerPdfDocument = await window.pdfjsLib.getDocument(url).promise;
+        viewerPdfTotalPages = viewerPdfDocument.numPages;
+        await renderViewerPdfPage(1);
+    } catch (error) {
+        elFileFallback.textContent = 'No se pudo visualizar este PDF, pero puedes descargarlo.';
+        elFileFallback.classList.remove('hidden');
+    }
+}
+
+async function renderViewerPdfPage(pageNumber) {
+    if (!viewerPdfDocument || pageNumber < 1 || pageNumber > viewerPdfTotalPages) return;
+    viewerPdfPage = pageNumber;
+    const page = await viewerPdfDocument.getPage(pageNumber);
+    const viewport = page.getViewport({ scale: 1.25 });
+    elFilePdf.width = viewport.width;
+    elFilePdf.height = viewport.height;
+    await page.render({ canvasContext: elFilePdf.getContext('2d'), viewport }).promise;
+    elFilePdf.classList.remove('hidden');
+    elFilePdfControls.classList.remove('hidden');
+    elPdfPageNumber.textContent = `${pageNumber} / ${viewerPdfTotalPages}`;
+}
+
+function loadViewerEpub(file) {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+        const book = window.ePub(reader.result);
+        viewerEpubRendition = book.renderTo(elFileEpub, { width: '100%', height: '100%' });
+        viewerEpubRendition.display();
+        elFileEpub.classList.remove('hidden');
+    });
+    reader.readAsArrayBuffer(file);
+}
+
+function downloadViewerFile() {
+    if (!viewerCurrentFile) return;
+    const link = document.createElement('a');
+    link.href = viewerCurrentFile.url;
+    link.download = viewerCurrentFile.file.name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
 }
 
 const savedTheme = safeReadJSON('customTheme', null);
@@ -279,6 +542,13 @@ function applyTheme(theme) {
     root.style.setProperty('--active-bg', hexToRgba(theme.primary, 0.18));
     root.style.setProperty('--active-border', hexToRgba(theme.primary, 0.72));
     root.style.setProperty('--active-text', theme.primary);
+    root.style.setProperty('--viewer-bg', hexToRgba(theme.bg, 0.96));
+    root.style.setProperty('--viewer-surface', hexToRgba(theme.panel, 0.98));
+    root.style.setProperty('--viewer-soft', hexToRgba(theme.primary, 0.08));
+    root.style.setProperty('--viewer-border', hexToRgba(theme.primary, 0.28));
+    root.style.setProperty('--viewer-accent', theme.primary);
+    root.style.setProperty('--viewer-accent-soft', hexToRgba(theme.primary, 0.18));
+    root.style.setProperty('--viewer-text-muted', hexToRgba(theme.accent, 0.82));
 }
 
 function saveTheme(theme) {
